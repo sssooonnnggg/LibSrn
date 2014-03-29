@@ -1,7 +1,7 @@
 /*!
 	Description : Capture window
 	Author		: Ruining Song
-	Date		: 2014/2/24
+	Date		: 2014/2/25
 */
 
 #ifndef WINDOWCAPTURE
