@@ -14,11 +14,11 @@ class DebugTools
 {
 public:
 
-#ifdef UNICODE
-#define OutputDebugPrintf OutputDebugPrintfW
-#else
-#define OutputDebugPrintf OutputDebugPrintfA
-#endif
+//#ifdef UNICODE
+//#define OutputDebugPrintfW OutputDebugPrintfWW
+//#else
+//#define OutputDebugPrintfW OutputDebugPrintfWA
+//#endif
 
 	// 输出调试信息
 	inline static void OutputDebugPrintfW(LPCWSTR ptzFormat, ...)

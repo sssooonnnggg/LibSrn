@@ -22,6 +22,7 @@ BOOL FileTools::Exist(LPCWSTR lpwzFilePath)
 	if ( INVALID_FILE_ATTRIBUTES == dwResult
 		&& ERROR_FILE_NOT_FOUND == GetLastError() )
 	{
+		DebugTools::OutputDebugPrintfW(L"[FileTools] File is not exist.[%s]\r\n", lpwzFilePath);
 		return FALSE;
 	}
 
@@ -31,12 +32,12 @@ BOOL FileTools::Exist(LPCWSTR lpwzFilePath)
 // ////////////////////////////////////////////////////////////////////////////////
 // 获取文件所在目录 
 //
-VOID FileTools::GetFileDir(IN LPCWSTR lpwzFile, OUT LPWSTR lpwzFilePath)
+VOID FileTools::GetFileDir(IN LPCWSTR lpwzFile, OUT LPWSTR lpwzFilePath, WCHAR c)
 {
 	std::wstring file(lpwzFile);
 	std::wstring::size_type index = 0;
 
-	index = file.find_last_of(L'\\');
+	index = file.find_last_of(c);
 
 	if ( -1 != index )
 	{
@@ -52,6 +53,17 @@ VOID FileTools::GetExePath(OUT LPWSTR lpwzExePath)
 	GetModuleFileNameW(NULL, lpwzExePath, MAX_PATH);
 	LPWSTR wzEnd = wcsrchr(lpwzExePath, '\\');
 	*wzEnd = L'\0';
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// 获取上一级目录
+//
+VOID FileTools::GetParentDir(IN OUT LPWSTR lpwzPath)
+{
+	LPWSTR wzEnd = wcsrchr(lpwzPath, '\\');
+
+	if ( NULL != wzEnd )
+		*wzEnd = L'\0';
 }
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +108,7 @@ BOOL FileTools::ReadFileToMem(LPCWSTR lpwzFile, LPBYTE lpBuffer)
 	
 	if ( INVALID_HANDLE_VALUE == hFile )
 	{
-		DebugTools::OutputDebugPrintf(L"[FileTools] [ReadFileToMem] CreateFile Failed.[%s]\r\n", lpwzFile);
+		DebugTools::OutputDebugPrintfW(L"[FileTools] [ReadFileToMem] CreateFile Failed.[%s]\r\n", lpwzFile);
 		return FALSE;
 	}
 
@@ -105,7 +117,7 @@ BOOL FileTools::ReadFileToMem(LPCWSTR lpwzFile, LPBYTE lpBuffer)
 
 	if ( !ReadFile(hFile, lpBuffer, dwSize, &dwRead, NULL) )
 	{
-		DebugTools::OutputDebugPrintf(L"[FileTools] [ReadFileToMem] Read File Failed.[%d]\r\n", GetLastError());
+		DebugTools::OutputDebugPrintfW(L"[FileTools] [ReadFileToMem] Read File Failed.[%d]\r\n", GetLastError());
 		CloseHandle(hFile);
 		return FALSE;
 	}
@@ -130,7 +142,7 @@ BOOL FileTools::WriteFileFromMem(LPCWSTR lpwzFile, LPBYTE lpBuffer, DWORD dwLen)
 
 	if ( INVALID_HANDLE_VALUE == hFile )
 	{
-		DebugTools::OutputDebugPrintf(L"[FileTools] [WriteFileFromMem] CreateFile Failed..[%s]\r\n", lpwzFile);
+		DebugTools::OutputDebugPrintfW(L"[FileTools] [WriteFileFromMem] CreateFile Failed..[%s]\r\n", lpwzFile);
 		return FALSE;
 	}
 
@@ -138,7 +150,7 @@ BOOL FileTools::WriteFileFromMem(LPCWSTR lpwzFile, LPBYTE lpBuffer, DWORD dwLen)
 
 	if ( !WriteFile(hFile, lpBuffer, dwLen, &dwWrite, NULL) )
 	{
-		DebugTools::OutputDebugPrintf(L"[FileTools] [WriteFileFromMem] Write File Failed.[%d]\r\n", GetLastError());
+		DebugTools::OutputDebugPrintfW(L"[FileTools] [WriteFileFromMem] Write File Failed.[%d]\r\n", GetLastError());
 		CloseHandle(hFile);
 		return FALSE;
 	}

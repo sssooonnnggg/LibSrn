@@ -18,13 +18,17 @@ public:
 	static BOOL Exist(LPCWSTR lpwzFilePath);
 
 	// 获取文件所在目录
-	// eg: GetFileDir(L"C:\\Dir\\Test.exe", wzBuffer)
+	// eg: GetFileDir(L"C:\\Dir\\Test.exe", wzBuffer, L'\\')
 	// 执行之后：wzBuffer : L"C:\\Dir"
-	static VOID GetFileDir(IN LPCWSTR lpwzFile, OUT LPWSTR lpwzFilePath);
+	static VOID GetFileDir(IN LPCWSTR lpwzFile, OUT LPWSTR lpwzFilePath, WCHAR c);
 
 	// 获取程序自身所在路径
 	// 注 : 传入的 buffer 长度应为 MAX_PATH
 	static VOID GetExePath(OUT LPWSTR lpwzExePath);
+
+	// 获取上一级目录
+	// "C:\\123\\456" -> "C:\\123"
+	static VOID GetParentDir(IN OUT LPWSTR lpwzPath);
 
 	// 获取文件大小，如不存在则返回 -1
 	static DWORD GetFileSize(LPCWSTR lpwzFile);

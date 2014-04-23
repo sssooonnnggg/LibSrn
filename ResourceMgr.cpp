@@ -160,7 +160,7 @@ BOOL ResourceMgr::Extract(LPCWSTR lpwzFileName)
 	}
 	else
 	{
-		DebugTools::OutputDebugPrintf(L"[ResourceMgr] [Extract] Can Not Find File. [%s]\r\n", lpwzFileName);
+		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [Extract] Can Not Find File. [%s]\r\n", lpwzFileName);
 		return FALSE;
 	}
 }
@@ -188,7 +188,7 @@ BOOL ResourceMgr::ExtractAll()
 		wsprintfW(wzFullPath, L"%s\\%s", wzExePath, lpHeader->wzFileName);
 		//FileTools::CreateDirectorys(wzFullPath);
 		FileTools::WriteFileFromMem(wzFullPath, m_lpBuffer->buffer+i+sizeof(FILE_HEADER), lpHeader->dwFileSize);
-		DebugTools::OutputDebugPrintf(L"[ResourceMgr] [ExtractAll] Exacting File : %s\r\n", lpHeader->wzFileName);
+		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [ExtractAll] Exacting File : %s\r\n", lpHeader->wzFileName);
 		i += sizeof(FILE_HEADER) + lpHeader->dwFileSize;
 	}
 
@@ -215,7 +215,7 @@ BOOL ResourceMgr::ExtractToBuffer()
 
 	if ( NULL == hExe )
 	{
-		DebugTools::OutputDebugPrintf(L"[ResourceMgr] [ExtractToBuffer] Open Exe Failed.[%s]\r\n", m_wzExePath);
+		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [ExtractToBuffer] Open Exe Failed.[%s]\r\n", m_wzExePath);
 		return FALSE;
 	}
 	
@@ -232,7 +232,7 @@ BOOL ResourceMgr::ExtractToBuffer()
 	HANDLE hResLoad = LoadResource(hExe, hRes);
 	if ( NULL == hRes )
 	{
-		DebugTools::OutputDebugPrintf(L"[ResourceMgr] [ExtractToBuffer] LoadResource Failed.\r\n");
+		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [ExtractToBuffer] LoadResource Failed.\r\n");
 		EndUpdateResourceW(hResLoad, FALSE);
 		FreeLibrary(hExe);
 		return FALSE;
@@ -259,7 +259,7 @@ BOOL ResourceMgr::AddBufferToResource()
 
 	if ( NULL == hRsc )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ResourceMgr] [AddBufferToResource] BeginUpdateResourceW Failed. [%d] \r\n", GetLastError());
 		return FALSE;
 	}
@@ -272,14 +272,14 @@ BOOL ResourceMgr::AddBufferToResource()
 		m_lpBuffer->buffer, 
 		m_lpBuffer->curlen) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ResourceMgr] [AddBufferToResource] UpdateResourceW Failed. [%d] \r\n", GetLastError());
 		return FALSE;
 	}
 
 	if ( !EndUpdateResourceW(hRsc, FALSE) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ResourceMgr] [AddBufferToResource] EndUpdateResourceW Failed. [%d] \r\n", GetLastError());
 		return FALSE;
 	}
