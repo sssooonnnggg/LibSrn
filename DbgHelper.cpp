@@ -18,7 +18,7 @@ void CreateMiniDump(EXCEPTION_POINTERS* e)
 	wchar_t fileName[MAX_PATH] = {0};
 	SYSTEMTIME time = {0};
 	GetSystemTime(&time);
-	wsprintfW(fileName, L"%s\\CrashDump__%4d%02d%02d_%02d%02d%02d",
+	wsprintfW(fileName, L"%s\\CrashDump__%4d%02d%02d_%02d%02d%02d.dmp",
 		filePath,
 		time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond);
 
