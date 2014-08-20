@@ -1,6 +1,6 @@
 /* LzmaDec.c -- LZMA Decoder
 2009-09-20 : Igor Pavlov : Public domain */
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "LzmaDec.h"
 
 #include <string.h>

@@ -5,7 +5,7 @@
 	Remark		:
 */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #include "DebugTools.h"
 #include "LzmaHelper.h"
@@ -53,7 +53,7 @@ BOOL LzmaHelper::CompressBuffer(
 	
 	if ( SZ_OK != rc )
 	{ 
-		DebugTools::OutputDebugPrintf(L"[LzmaHelper] [CompressBuffer] CompressBuffer Failed.[%d]\r\n", rc);
+		DebugTools::OutputDebugPrintfW(L"[LzmaHelper] [CompressBuffer] CompressBuffer Failed.[%d]\r\n", rc);
 		return FALSE;	
 	}
 	else
@@ -102,7 +102,7 @@ BOOL LzmaHelper::UnCompressBuffer(
 
 	if ( SZ_OK != rc )
 	{ 
-		DebugTools::OutputDebugPrintf(L"[LzmaHelper] [UnCompressBuffer] UnCompressBuffer Failed.[%d]\r\n", rc);
+		DebugTools::OutputDebugPrintfW(L"[LzmaHelper] [UnCompressBuffer] UnCompressBuffer Failed.[%d]\r\n", rc);
 		return FALSE;	
 	}
 	else
@@ -208,7 +208,7 @@ BOOL LzmaHelper::ReadFileToBuffer(LPWSTR wzFileName, PBYTE& lpBuffer, PDWORD lpd
 
 	if ( INVALID_HANDLE_VALUE == hFile )
 	{
-		DebugTools::OutputDebugPrintf(L"[LzmaHelper] [ReadFileToBuffer] Can't Open File [%s]\r\n", wzFileName);
+		DebugTools::OutputDebugPrintfW(L"[LzmaHelper] [ReadFileToBuffer] Can't Open File [%s]\r\n", wzFileName);
 		return FALSE;
 	}
 	
@@ -244,7 +244,7 @@ BOOL LzmaHelper::WriteBufferToFile(LPWSTR wzFileName, PBYTE lpBuffer, DWORD dwBu
 
 	if ( INVALID_HANDLE_VALUE == hFile )
 	{
-		DebugTools::OutputDebugPrintf(L"[LzmaHelper] [WriteBufferToFile] Can't Open File [%s]\r\n", wzFileName);
+		DebugTools::OutputDebugPrintfW(L"[LzmaHelper] [WriteBufferToFile] Can't Open File [%s]\r\n", wzFileName);
 		return FALSE;
 	}
 	

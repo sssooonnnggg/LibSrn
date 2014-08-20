@@ -9,6 +9,7 @@
 #define FILETOOLS_H
 
 #include <Windows.h>
+#include <string>
 
 class FileTools
 {
@@ -25,6 +26,12 @@ public:
 	// 获取程序自身所在路径
 	// 注 : 传入的 buffer 长度应为 MAX_PATH
 	static VOID GetExePath(OUT LPWSTR lpwzExePath);
+
+	// 获取程序自身所在路径
+	static std::wstring GetExePathW();
+
+	// 获取 DLL 所在路径
+	static std::wstring GetDllPathW(HINSTANCE hModule);
 
 	// 获取上一级目录
 	// "C:\\123\\456" -> "C:\\123"

@@ -25,7 +25,7 @@ public:
 	{
 #ifdef _DEBUG
 		va_list vlArgs;
-		WCHAR szText[1024];
+		WCHAR szText[1024*5];
 		va_start(vlArgs, ptzFormat);
 		wvsprintfW(szText, ptzFormat, vlArgs);
 		OutputDebugStringW(szText);
@@ -37,7 +37,7 @@ public:
 	{
 #ifdef _DEBUG
 		va_list vlArgs;
-		CHAR szText[1024];
+		CHAR szText[1024*5];
 		va_start(vlArgs, ptzFormat);
 		wvsprintfA(szText, ptzFormat, vlArgs);
 		OutputDebugStringA(szText);

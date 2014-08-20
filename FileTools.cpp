@@ -5,7 +5,7 @@
 	Remark		: 
 */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "FileTools.h"
 #include "DebugTools.h"
 
@@ -53,6 +53,32 @@ VOID FileTools::GetExePath(OUT LPWSTR lpwzExePath)
 	GetModuleFileNameW(NULL, lpwzExePath, MAX_PATH);
 	LPWSTR wzEnd = wcsrchr(lpwzExePath, '\\');
 	*wzEnd = L'\0';
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// 获取程序自身所在路径
+//
+std::wstring FileTools::GetExePathW()
+{
+	WCHAR lpwzExePath[MAX_PATH] = {0};
+	GetModuleFileNameW(NULL, lpwzExePath, MAX_PATH);
+	LPWSTR wzEnd = wcsrchr(lpwzExePath, '\\');
+	*wzEnd = L'\0';
+
+	return std::wstring(lpwzExePath);
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// 获取 Dll 所在路径
+//
+std::wstring FileTools::GetDllPathW(HINSTANCE hModule)
+{
+	WCHAR lpwzExePath[MAX_PATH] = {0};
+	GetModuleFileNameW(hModule, lpwzExePath, MAX_PATH);
+	LPWSTR wzEnd = wcsrchr(lpwzExePath, '\\');
+	*wzEnd = L'\0';
+
+	return std::wstring(lpwzExePath);
 }
 
 // ////////////////////////////////////////////////////////////////////////////////

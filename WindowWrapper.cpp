@@ -1,6 +1,9 @@
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "WindowWrapper.h"
+#include "DebugTools.h"
+
+#include <tchar.h>
 
 void WindowWrapper::RegisterClass(WNDPROC lpProc)
 {
@@ -30,8 +33,10 @@ void WindowWrapper::InitInstance()
 
 	int id = GetLastError();
 
+	DebugTools::OutputDebugPrintfW(L"[WindowsWrapper] CreateWindow : %d\r\n", id);
+
 #ifdef _DEBUG
-	ShowWindow(m_hWnd, SW_SHOW);
+	//ShowWindow(m_hWnd, SW_SHOW);
 #endif
 
 	UpdateWindow(m_hWnd);
@@ -47,3 +52,44 @@ void WindowWrapper::MessageLoop()
 	}
 }
 
+WindowWrapperThread::WindowWrapperThread() 
+	: m_thread(NULL) 
+{
+	m_initEvent = CreateEvent(NULL, TRUE, FALSE, L"InitInstance");
+	m_loopEvent = CreateEvent(NULL, TRUE, FALSE, L"MessageLoop");
+}
+
+WindowWrapperThread::~WindowWrapperThread()
+{	
+	if ( m_thread )
+		CloseHandle(m_thread);
+
+	CloseHandle(m_initEvent);
+	CloseHandle(m_loopEvent);
+}
+
+void WindowWrapperThread::Init()
+{
+	m_thread = CreateThread(NULL, 1024, WindowThread, (LPVOID)this, NULL, NULL);
+}
+
+void WindowWrapperThread::InitInstance()
+{
+	SetEvent(m_initEvent);
+}
+
+void WindowWrapperThread::MessageLoop()
+{
+	SetEvent(m_loopEvent);
+}
+
+DWORD WindowWrapperThread::WindowThread(LPVOID param)
+{
+	WindowWrapperThread* owner = static_cast<WindowWrapperThread*>(param);
+	WaitForSingleObject(owner->m_initEvent, INFINITE);
+	owner->m_window.InitInstance();
+	WaitForSingleObject(owner->m_loopEvent, INFINITE);
+	owner->m_window.MessageLoop();
+
+	return 0;
+}

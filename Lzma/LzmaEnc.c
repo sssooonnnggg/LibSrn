@@ -1,7 +1,7 @@
 /* LzmaEnc.c -- LZMA Encoder
 2010-04-16 : Igor Pavlov : Public domain */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <string.h>
 
 /* #define SHOW_STAT */

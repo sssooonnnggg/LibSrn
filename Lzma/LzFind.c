@@ -1,6 +1,6 @@
 /* LzFind.c -- Match finder for LZ algorithms
 2009-04-22 : Igor Pavlov : Public domain */
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <string.h>
 
 #include "LzFind.h"

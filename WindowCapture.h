@@ -8,6 +8,7 @@
 #define WINDOWCAPTURE
 
 #include <Windows.h>
+#include <string>
 
 class WindowCapture
 {
@@ -35,7 +36,7 @@ public:
 	\param
 		Path to save capture
 	*/
-	WindowCaptureThread(HWND hWindow, unsigned int frame, LPCWSTR wzPicPath);
+	WindowCaptureThread(HWND hWindow, double frame, LPCWSTR wzPicPath);
 	~WindowCaptureThread();
 
 	void StartCapture();
@@ -48,8 +49,8 @@ private:
 	HWND m_hWindow;
 	HANDLE m_hThread;
 	HANDLE m_hEvent;
-	unsigned int m_frame;
-	LPCWSTR m_wzPicPath;
+	double m_frame;
+	std::wstring m_wzPicPath;
 };
 
 #endif // WINDOWCAPTURE

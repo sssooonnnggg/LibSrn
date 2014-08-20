@@ -1,12 +1,12 @@
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "FileTools.h"
 #include "DebugTools.h"
 #include "WindowCapture.h"
 #include <atlimage.h>
-#include <vfw.h>
+//#include <vfw.h>
 
-#pragma comment(lib, "vfw32.lib")
+//#pragma comment(lib, "vfw32.lib")
 
 #pragma warning(disable:4996)
 
@@ -43,7 +43,7 @@ bool WindowCapture::DoCapture( HWND hWnd, LPWSTR wzPicName )
 	return true;
 }
 
-void WindowCapture::BmpToAvi(LPWSTR wzAviName, LPWSTR wzPicPath, int frame)
+/*void WindowCapture::BmpToAvi(LPWSTR wzAviName, LPWSTR wzPicPath, int frame)
 {
 	AVIFileInit();
 	PAVIFILE pf = NULL;
@@ -95,9 +95,9 @@ void WindowCapture::BmpToAvi(LPWSTR wzAviName, LPWSTR wzPicPath, int frame)
 	AVIStreamClose(ps);
 	AVIFileRelease(pf);
 	AVIFileExit();
-}
+}*/
 
-WindowCaptureThread::WindowCaptureThread(HWND hWindow, unsigned int frame, LPCWSTR wzPicPath)
+WindowCaptureThread::WindowCaptureThread(HWND hWindow, double frame, LPCWSTR wzPicPath)
 	: m_hWindow(hWindow)
 	, m_frame(frame)
 	, m_wzPicPath(wzPicPath)
@@ -113,6 +113,7 @@ WindowCaptureThread::~WindowCaptureThread()
 
 void WindowCaptureThread::StartCapture()
 {
+	ResetEvent(m_hEvent);
 	m_hThread = CreateThread(NULL, 1024, CaptureThread, (LPVOID)this, NULL, NULL);
 }
 
@@ -129,9 +130,9 @@ DWORD WINAPI WindowCaptureThread::CaptureThread(LPVOID lParam)
 
 	while ( WAIT_OBJECT_0 != WaitForSingleObject(owner->m_hEvent, 0) )
 	{
-		Sleep(1000/owner->m_frame);
-		wsprintf(wzPicName, L"%s\\%d.jpg", owner->m_wzPicPath, frame++);
+		wsprintf(wzPicName, L"%s\\Capture_%.3d.jpg", owner->m_wzPicPath.c_str(), frame++);
 		WindowCapture::DoCapture(owner->m_hWindow, wzPicName);
+		Sleep(1000.0/owner->m_frame);
 	}
 	return 0;
 }

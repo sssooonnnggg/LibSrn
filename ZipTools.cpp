@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #define _CRT_NONSTDC_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
@@ -55,14 +55,14 @@ void WriteFileToZip(WIN32_FIND_DATAW ffd, zipFile& zf, LPCWSTR wzFullPath, LPCWS
 
 	if ( ZIP_OK != err )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [AddFileToZip] Error In Opening File [%s] \r\n", wzRelativeName);
 	}
 
 	fin = _wfopen(wzRelativeName, L"rb");
 	if ( NULL == fin )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [AddFileToZip] Error In Opening %s For Reading.\r\n", wzRelativeName);
 	}
 
@@ -80,7 +80,7 @@ void WriteFileToZip(WIN32_FIND_DATAW ffd, zipFile& zf, LPCWSTR wzFullPath, LPCWS
 
 			if ( err < 0 )
 			{
-				DebugTools::OutputDebugPrintf(
+				DebugTools::OutputDebugPrintfW(
 					L"[ZipTools] [AddFileToZip] Error In Writing %s In the Zipfile.\r\n",
 					wzRelativeName);
 			}
@@ -123,7 +123,7 @@ void AddFileToZip(zipFile& zf, LPCWSTR wzPath, LPCWSTR wzParentPath, PBYTE buf)
 		wsprintf(wzFullPath, L"%s\\%s", wzPath, ffd.cFileName);
 		WriteFileToZip(ffd, zf, wzFullPath, wzParentPath, buf);
 
-		DebugTools::OutputDebugPrintf(L"[ZipTools] [AddFileToZip] Add File Success. [%s]\r\n", wzFullPath);
+		DebugTools::OutputDebugPrintfW(L"[ZipTools] [AddFileToZip] Add File Success. [%s]\r\n", wzFullPath);
 
 	} while ( 0 != FindNextFileW(hFind, &ffd));
 }
@@ -157,7 +157,7 @@ int ExtractSingleFile(unzFile& uf)
 
 	if ( UNZ_OK != err )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [ExtractSingleFile] unzGetCurrentFileInfo64 Failed.[%d]\r\n", err);
 		return err;
 	}
@@ -180,7 +180,7 @@ int ExtractSingleFile(unzFile& uf)
 
 		if ( err != UNZ_OK)
 		{
-			DebugTools::OutputDebugPrintf(
+			DebugTools::OutputDebugPrintfW(
 				L"[ZipTools] [ExtractSingleFile] unzOpenCurrentFilePassword Failed.[%d]\r\n", err);
 		}
 
@@ -188,10 +188,10 @@ int ExtractSingleFile(unzFile& uf)
 		WCHAR wzFileName[MAX_PATH] = {0};
 		MultiByteToWideChar(CP_ACP, 0, filename_inzip, -1, wzFileName, MAX_PATH);
 		WCHAR wzDirName[MAX_PATH] = {0};
-		FileTools::GetFileDir(wzFileName, wzDirName);
+		FileTools::GetFileDir(wzFileName, wzDirName, L'\\');
 		FileTools::CreateDirectorys(wzDirName);
 
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[FileTools] [UnZip] Extracting %s ...\r\n", wzFileName);
 		
 		FILE* fout = fopen64(filename_inzip, "wb");
@@ -202,7 +202,7 @@ int ExtractSingleFile(unzFile& uf)
 
 			if ( err < 0 )
 			{
-				DebugTools::OutputDebugPrintf(
+				DebugTools::OutputDebugPrintfW(
 					L"[ZipTools] [ExtractSingleFile] unzReadCurrentFile Failed.[%d]\r\n", err);
 				break;
 			}
@@ -210,7 +210,7 @@ int ExtractSingleFile(unzFile& uf)
 			{
 				if ( fwrite(buf,err,1,fout) != 1 )
 				{
-					DebugTools::OutputDebugPrintf(
+					DebugTools::OutputDebugPrintfW(
 						L"[ZipTools] [ExtractSingleFile] Write File Failed.[%s]\r\n", 
 						filename_inzip);
 
@@ -244,7 +244,7 @@ void ExtractFile(unzFile& uf)
 
 	if ( UNZ_OK != err )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [ExtractFile] unzGetGlobalInfo64 Failed.\r\n");
 	}
 
@@ -260,7 +260,7 @@ void ExtractFile(unzFile& uf)
 			err = unzGoToNextFile(uf);
 			if ( err != UNZ_OK )
 			{
-				DebugTools::OutputDebugPrintf(
+				DebugTools::OutputDebugPrintfW(
 					L"[ZipTools] [ExtractFile] unzGoToNextFile Failed.\r\n");
 				break;
 			}
@@ -278,24 +278,26 @@ bool ZipTools::Zip(LPCWSTR wzDirPath, LPCWSTR wzDestName)
 	//
 	if ( !FileTools::Exist(wzDirPath) )
 	{
-		DebugTools::OutputDebugPrintf(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDirPath);
+		DebugTools::OutputDebugPrintfW(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDirPath);
 		return false;
 	}
 
 	WCHAR wzDestDir[MAX_PATH] = {0};
-	FileTools::GetFileDir(wzDestName, wzDestDir);
+	FileTools::GetFileDir(wzDestName, wzDestDir, L'\\');
 
 	if ( !FileTools::Exist(wzDestDir) )
 	{
-		DebugTools::OutputDebugPrintf(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDestDir);
+		DebugTools::OutputDebugPrintfW(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDestDir);
 		return false;
 	}
 
-	// 设置当前工作目录为 wzDirPath 的上一层
+	// 设置当前工作目录
+	SetCurrentDirectoryW(wzDirPath);
+
 	WCHAR wzParentDir[MAX_PATH] = {0};
-	FileTools::GetFileDir(wzDirPath, wzParentDir);
+	wcscpy_s(wzParentDir, wzDirPath);
+	//FileTools::GetFileDir(wzDirPath, wzParentDir, L'\\');
 	wcscat_s(wzParentDir, L"\\");
-	SetCurrentDirectoryW(wzParentDir);
 
 	//
 	// 创建 zip 文件
@@ -306,7 +308,7 @@ bool ZipTools::Zip(LPCWSTR wzDirPath, LPCWSTR wzDestName)
 
 	if ( NULL == zf )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [Zip] Create Zip File Failed. [%s] \r\n", wzDestName);
 		return false;
 	}
@@ -337,13 +339,13 @@ bool ZipTools::UnZip(LPCWSTR wzZipName, LPCWSTR wzDestPath)
 	//
 	if ( !FileTools::Exist(wzZipName) )
 	{
-		DebugTools::OutputDebugPrintf(L"[ZipTools] [UnZip] File Not Exist. [%s]\r\n", wzZipName);
+		DebugTools::OutputDebugPrintfW(L"[ZipTools] [UnZip] File Not Exist. [%s]\r\n", wzZipName);
 		return false;
 	}
 
 	if ( !FileTools::Exist(wzDestPath) )
 	{
-		DebugTools::OutputDebugPrintf(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDestPath);
+		DebugTools::OutputDebugPrintfW(L"[ZipTools] [Zip] Path Not Exist. [%s]\r\n", wzDestPath);
 		return false;
 	}
 
@@ -354,7 +356,7 @@ bool ZipTools::UnZip(LPCWSTR wzZipName, LPCWSTR wzDestPath)
 
 	if ( NULL == uf )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[ZipTools] [Zip] Open Zip File Failed.[%s]\r\n", wzZipName);
 	}
 

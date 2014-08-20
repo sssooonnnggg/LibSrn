@@ -43,6 +43,9 @@ public:
 	// 释放所有文件
 	BOOL ExtractAll();
 
+	// 释放所有文件
+	BOOL ExtractAll(LPCWSTR lpwzPath);
+
 private:
 
 	// 释放文件至 m_lpBuffer

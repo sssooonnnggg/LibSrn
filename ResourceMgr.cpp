@@ -10,7 +10,7 @@
 			资源结构：| 文件名 | 文件大小 | 文件内容 | 文件名2 | 文件大小2 | 文件内容 |...
 */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "ResourceMgr.h"
 #include "FileTools.h"
 #include "DebugTools.h"
@@ -186,6 +186,34 @@ BOOL ResourceMgr::ExtractAll()
 		WCHAR wzExePath[MAX_PATH] = {0};
 		FileTools::GetExePath(wzExePath);
 		wsprintfW(wzFullPath, L"%s\\%s", wzExePath, lpHeader->wzFileName);
+		//FileTools::CreateDirectorys(wzFullPath);
+		FileTools::WriteFileFromMem(wzFullPath, m_lpBuffer->buffer+i+sizeof(FILE_HEADER), lpHeader->dwFileSize);
+		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [ExtractAll] Exacting File : %s\r\n", lpHeader->wzFileName);
+		i += sizeof(FILE_HEADER) + lpHeader->dwFileSize;
+	}
+
+	return TRUE;
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// 释放所有文件
+//
+BOOL ResourceMgr::ExtractAll(LPCWSTR lpwzPath)
+{
+	if ( !ExtractToBuffer() )
+	{
+		return FALSE;
+	}
+
+	DWORD dwHeaderLen = sizeof(FILE_HEADER);
+	PFILE_HEADER lpHeader = NULL;
+
+	// 循环查找文件是否在资源中
+	for (DWORD i = 0; i < m_lpBuffer->curlen; )
+	{
+		lpHeader = (PFILE_HEADER)(m_lpBuffer->buffer+i);
+		WCHAR wzFullPath[MAX_PATH] = {0};
+		wsprintfW(wzFullPath, L"%s\\%s", lpwzPath, lpHeader->wzFileName);
 		//FileTools::CreateDirectorys(wzFullPath);
 		FileTools::WriteFileFromMem(wzFullPath, m_lpBuffer->buffer+i+sizeof(FILE_HEADER), lpHeader->dwFileSize);
 		DebugTools::OutputDebugPrintfW(L"[ResourceMgr] [ExtractAll] Exacting File : %s\r\n", lpHeader->wzFileName);
