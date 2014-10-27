@@ -3,17 +3,24 @@
 #include "DebugTools.h"
 #include "FileTools.h"
 
+#include <MMSystem.h>
+
 extern "C" {
 #include "interf_dec.h"
 }
+
+#pragma comment(lib, "Winmm.lib")
 
 const int g_Sizes[] = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 6, 5, 5, 0, 0, 0, 0 };
 
 AmrDecoder::AmrDecoder(const wchar_t* filePath)
 	: m_filePath(filePath)
 	, m_valid(true)
-	, m_buffer(NULL)
-	, m_bufferSize(0)
+	, m_amrBuffer(NULL)
+	, m_amrBufferSize(0)
+	, m_wavBuffer(NULL)
+	, m_wavBufferSize(0)
+	, m_hWavOut(0)
 {
 	ValidateFile();
 
@@ -23,8 +30,10 @@ AmrDecoder::AmrDecoder(const wchar_t* filePath)
 
 AmrDecoder::~AmrDecoder()
 {
-	if ( m_buffer )
-		delete [] m_buffer;
+	if ( m_amrBuffer )
+		delete [] m_amrBuffer;
+
+	Stop();
 }
 
 void AmrDecoder::ValidateFile()
@@ -60,30 +69,11 @@ void AmrDecoder::ValidateFile()
 	CloseHandle(hFile);
 }
 
-void AmrDecoder::ReadBuffer()
-{
-	if ( NULL != m_buffer ) return;
-
-	HANDLE hFile = CreateFile(
-		m_filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	DWORD fileSize = GetFileSize(hFile, NULL);
-
-	char header[6] = {0};
-	DWORD readed = 0;
-
-	ReadFile(hFile, header, 6, &readed, NULL);
-
-	m_bufferSize = fileSize-6;
-	m_buffer = new unsigned char[m_bufferSize];
-	ReadFile(hFile, m_buffer, m_bufferSize, &readed, NULL);
-}
-
 bool AmrDecoder::ConvertToWav(const wchar_t* filePath)
 {
 	if ( !m_valid ) return false;
 
-	ReadBuffer();
+	ReadAmrBuffer();
 	HANDLE hWav = CreateWavFile(filePath);
 
 	if ( INVALID_HANDLE_VALUE == hWav )
@@ -94,12 +84,12 @@ bool AmrDecoder::ConvertToWav(const wchar_t* filePath)
 
 	while ( true ) 
 	{
-		if ( pos >= m_bufferSize )
+		if ( pos >= m_amrBufferSize )
 			break;
 
-		int size = g_Sizes[(m_buffer[pos] >> 3) & 0x0F];
+		int size = g_Sizes[(m_amrBuffer[pos] >> 3) & 0x0F];
 		short outbuffer[160] = {0};
-		Decoder_Interface_Decode(amr, m_buffer+pos, outbuffer, 0);
+		Decoder_Interface_Decode(amr, m_amrBuffer+pos, outbuffer, 0);
 
 		unsigned char littleendian[320] = {0};
 		unsigned char* ptr = littleendian;
@@ -122,6 +112,25 @@ bool AmrDecoder::ConvertToWav(const wchar_t* filePath)
 	CloseHandle(hWav);
 
 	return true;
+}
+
+void AmrDecoder::ReadAmrBuffer()
+{
+	if ( NULL != m_amrBuffer ) return;
+
+	HANDLE hFile = CreateFile(
+		m_filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	DWORD fileSize = GetFileSize(hFile, NULL);
+
+	char header[6] = {0};
+	DWORD readed = 0;
+
+	ReadFile(hFile, header, 6, &readed, NULL);
+
+	m_amrBufferSize = fileSize-6;
+	m_amrBuffer = new unsigned char[m_amrBufferSize];
+	ReadFile(hFile, m_amrBuffer, m_amrBufferSize, &readed, NULL);
 }
 
 HANDLE AmrDecoder::CreateWavFile(const wchar_t* filePath)
@@ -173,4 +182,110 @@ void AmrDecoder::WriteWavHeader(HANDLE hWav, int dataLength)
 	WriteFile(hWav, (LPCVOID)(&dump2), 2, &written, NULL);
 	WriteFile(hWav, (LPCVOID)"data", 4, &written, NULL);
 	WriteFile(hWav, (LPCVOID)(&dataLength), 4, &written, NULL);
+}
+
+void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+{
+	//printf("%x\r\n", uMsg);
+}
+
+bool AmrDecoder::Play()
+{
+	if ( !m_wavBuffer )
+		if ( !ReadWavBuffer() ) return false;
+
+	WAVEFORMATEX formatInfo = {WAVE_FORMAT_PCM, 1, 8000, 16000, 2, 16, 0};
+
+	MMRESULT result = waveOutOpen(&m_hWavOut, WAVE_MAPPER, &formatInfo, (DWORD_PTR)waveOutProc, NULL, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
+
+	if ( MMSYSERR_NOERROR != result )
+	{
+		DebugTools::OutputDebugPrintfW(L"[AmrDecoder] waveOutOpen Failed.\r\n");
+		return false;
+	}
+
+
+	WAVEHDR wavHeader = {m_wavBuffer, m_wavBufferSize, 0, 0, WHDR_BEGINLOOP | WHDR_ENDLOOP, 1, 0, 0};
+	memcpy(&m_wavHeader, &wavHeader, sizeof(WAVEHDR));
+
+	if ( MMSYSERR_NOERROR != waveOutPrepareHeader(m_hWavOut, &m_wavHeader, sizeof(WAVEHDR)) )
+	{
+		waveOutClose(m_hWavOut);
+		m_hWavOut = NULL;
+		DebugTools::OutputDebugPrintfW(L"[AmrDecoder] waveOutPrepareHeader Failed.\r\n");
+		return false;
+	}
+
+	if ( MMSYSERR_NOERROR != waveOutWrite(m_hWavOut, &m_wavHeader, sizeof(WAVEHDR)) )
+	{
+		waveOutClose(m_hWavOut);
+		m_hWavOut = NULL;
+		DebugTools::OutputDebugPrintfW(L"[AmrDecoder] waveOutPrepareHeader Failed.\r\n");
+		return false;
+	}
+
+	return true;
+}
+
+bool AmrDecoder::ReadWavBuffer()
+{
+	if ( m_wavBuffer )
+		return true;
+
+	WCHAR tempPath[MAX_PATH] = {0};
+	GetTempPathW(MAX_PATH, tempPath);
+
+	WCHAR tempWav[MAX_PATH] = {0};
+	wsprintfW(tempWav, L"%stemp_%d.wav", tempPath, GetTickCount());
+
+	if ( !ConvertToWav(tempWav) )
+		return false;
+
+	HANDLE hFile = CreateFileW(tempWav, FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	m_wavBufferSize = GetFileSize(hFile, NULL) - 44;
+	SetFilePointer(hFile, 40, NULL, FILE_BEGIN);
+	int timeSec = m_wavBufferSize / 16000;
+
+	m_wavBuffer = new char[m_wavBufferSize];
+
+	DWORD readed = 0;
+	ReadFile(hFile, m_wavBuffer, m_wavBufferSize, &readed, NULL);
+
+	CloseHandle(hFile);
+	DeleteFileW(tempWav);
+
+	return true;
+}
+
+bool AmrDecoder::Stop()
+{
+	if ( m_hWavOut )
+	{
+		waveOutReset(m_hWavOut);
+		waveOutClose(m_hWavOut);
+		m_hWavOut = NULL;
+		delete [] m_wavBuffer;
+		m_wavBuffer = NULL;
+		m_wavBufferSize = 0;
+		return true;
+	}
+
+	return false;
+}
+
+void AmrDecoder::Load(const wchar_t* filePath)
+{
+	m_valid = true;
+
+	if ( m_amrBuffer )
+	{
+		delete [] m_amrBuffer;
+		m_amrBuffer = NULL;
+		m_amrBufferSize = 0;
+	}
+
+	Stop();
+	m_filePath = filePath;
+
+	ValidateFile();
 }
