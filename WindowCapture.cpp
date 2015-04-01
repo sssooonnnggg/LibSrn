@@ -10,6 +10,90 @@
 
 #pragma warning(disable:4996)
 
+/*#include <d3d9.h>
+#include <d3dx9.h>
+#pragma comment( lib, "d3d9.lib" )
+#pragma comment( lib, "d3dx9.lib" )
+
+bool WindowCapture::DoCaptureUseD3D(HWND window, const wchar_t* output)
+{
+	LPDIRECT3D9 pD3D = NULL;
+	D3DDISPLAYMODE ddm; 
+	D3DPRESENT_PARAMETERS d3dpp;
+
+	IDirect3DDevice9 * pd3dDevice;
+	IDirect3DSurface9 * pSurface;
+
+	ZeroMemory(&d3dpp,sizeof(D3DPRESENT_PARAMETERS)); 
+	ZeroMemory(&d3dpp, sizeof(d3dpp) );
+
+
+	if( NULL == ( pD3D = Direct3DCreate9(D3D_SDK_VERSION) ) ) 
+		return false;
+
+	if( FAILED( pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &ddm) ) ) 
+		return false;
+
+	d3dpp.Windowed = TRUE; 
+	d3dpp.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER; 
+	d3dpp.BackBufferFormat = ddm.Format; 
+	d3dpp.BackBufferHeight = ddm.Height; 
+	d3dpp.BackBufferWidth = ddm.Width; 
+	d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; 
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD; 
+	d3dpp.hDeviceWindow = GetDesktopWindow(); 
+	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; 
+	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+
+
+	if( FAILED( pD3D->CreateDevice(
+		D3DADAPTER_DEFAULT,
+		D3DDEVTYPE_HAL,
+		GetDesktopWindow(),
+		D3DCREATE_SOFTWARE_VERTEXPROCESSING ,
+		&d3dpp,
+		&pd3dDevice) ) ) 
+		return false;
+
+	if( FAILED( pd3dDevice->CreateOffscreenPlainSurface(
+		ddm.Width, 
+		ddm.Height, 
+		D3DFMT_A8R8G8B8, 
+		D3DPOOL_SCRATCH, 
+		&pSurface,
+		NULL) ) ) 
+		return false;
+
+	if ( FAILED( pd3dDevice->CreateOffscreenPlainSurface(
+		GetSystemMetrics(SM_CXSCREEN), 
+		GetSystemMetrics(SM_CYSCREEN), 
+		D3DFMT_A8R8G8B8, 
+		D3DPOOL_SCRATCH,
+		&pSurface, 
+		NULL) ) )
+		return false;
+
+	if ( FAILED ( pd3dDevice->GetFrontBufferData(0, pSurface) ) )
+		return false;
+
+	WINDOWINFO info = {0};
+
+	if ( window )
+		GetWindowInfo(window, &info);
+
+	if ( FAILED ( D3DXSaveSurfaceToFile(output, D3DXIFF_PNG, pSurface, NULL, window ? &info.rcWindow : NULL ) ) )
+		return false;
+
+	//D3DXSaveSurfaceToFile(L"Desktop.jpg",D3DXIFF_JPG,pSurface,NULL,NULL);//保存为 jpg格式
+	//D3DXSaveSurfaceToFile(L"Desktop.bmp",D3DXIFF_BMP,pSurface,NULL,NULL);//保存为 bmp格式
+	pSurface->Release(); 
+	pd3dDevice->Release();
+	pD3D->Release();
+
+	return true;
+
+}*/
+
 bool WindowCapture::DoCapture( HWND hWnd, LPWSTR wzPicName )
 {
 	HDC hScreenDC = CreateDC(_T("DISPLAY"),NULL,NULL,NULL);

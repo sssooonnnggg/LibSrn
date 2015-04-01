@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "WindowWrapper.h"
 #include "DebugTools.h"
 
@@ -35,9 +35,8 @@ void WindowWrapper::InitInstance()
 
 	DebugTools::OutputDebugPrintfW(L"[WindowsWrapper] CreateWindow : %d\r\n", id);
 
-#ifdef _DEBUG
-	//ShowWindow(m_hWnd, SW_SHOW);
-#endif
+	if ( m_showWnd )
+		ShowWindow(m_hWnd, SW_SHOW);
 
 	UpdateWindow(m_hWnd);
 }

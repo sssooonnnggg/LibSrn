@@ -21,6 +21,8 @@ public:
 	*/
 	static bool DoCapture(HWND hWnd, LPWSTR wzPicName);
 
+	//static bool DoCaptureUseD3D(HWND window, const wchar_t* output);
+
 	static void BmpToAvi(LPWSTR wzAviName, LPWSTR wzPicPath, int frame = 30);
 };
 

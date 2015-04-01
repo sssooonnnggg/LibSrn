@@ -23,6 +23,7 @@ public:
 
 	// 注入 dll
 	BOOL InjectDll(LPCWSTR wzTargetName, LPCWSTR wzDllName);
+	BOOL InjectDll(HANDLE hProcess, LPCWSTR wzDllName);
 
 	// 注入代码
 	// 参数：

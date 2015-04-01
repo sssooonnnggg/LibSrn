@@ -5,7 +5,7 @@
 	Remark		:
 */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "GPOTool.h"
 #include "DebugTools.h"
 
@@ -116,7 +116,7 @@ private:
 		WCHAR wzSysDir[MAX_PATH] = {0};
 		GetSystemDirectoryW(wzSysDir, MAX_PATH);
 		wsprintfW(m_wzGptPath, L"%s\\GroupPolicy\\gpt.ini", wzSysDir);
-		DebugTools::OutputDebugPrintf(L"[GpoToolImpl] Gpt Path : %s\r\n", m_wzGptPath);
+		DebugTools::OutputDebugPrintfW(L"[GpoToolImpl] Gpt Path : %s\r\n", m_wzGptPath);
 
 		// 如果目录不存在，创建相关目录
 		WCHAR wzGroupPolicy[MAX_PATH] = {0};
@@ -136,7 +136,7 @@ private:
 		CreateDirectoryW(wzScriptsLogOff, NULL);
 
 		wsprintfW(m_wzScriptPath, L"%s\\GroupPolicy\\User\\Scripts\\scripts.ini", wzSysDir);
-		DebugTools::OutputDebugPrintf(L"[GpoToolImpl] Script Path : %s\r\n", m_wzScriptPath);
+		DebugTools::OutputDebugPrintfW(L"[GpoToolImpl] Script Path : %s\r\n", m_wzScriptPath);
 	}
 
 private:
@@ -171,7 +171,7 @@ BOOL GpoTool::AddLogOffScript(LPCWSTR wzScriptPath)
 {
 	if ( !m_pGpoToolImpl->ModifyGpt() )
 	{
-		DebugTools::OutputDebugPrintf(L"[GpoTool] [AddLogOffScript] ModifyGpt Failed.\r\n");
+		DebugTools::OutputDebugPrintfW(L"[GpoTool] [AddLogOffScript] ModifyGpt Failed.\r\n");
 		return FALSE;
 	}
 
@@ -185,7 +185,7 @@ BOOL GpoTool::AddStartScript(LPCWSTR wzScriptPath)
 {
 	if ( !m_pGpoToolImpl->ModifyGpt() )
 	{
-		DebugTools::OutputDebugPrintf(L"[GpoTool] [AddLogOffScript] ModifyGpt Failed.\r\n");
+		DebugTools::OutputDebugPrintfW(L"[GpoTool] [AddLogOffScript] ModifyGpt Failed.\r\n");
 		return FALSE;
 	}
 

@@ -34,10 +34,15 @@ BOOL RemoteThreadInjecter::InjectDll(LPCWSTR wzTargetName, LPCWSTR wzDllName)
 		return FALSE;
 	}
 
+	return InjectDll(hProcess, wzDllName);
+}
+
+BOOL RemoteThreadInjecter::InjectDll(HANDLE hProcess, LPCWSTR wzDllName)
+{
 	// 提升进程权限
 	if ( !EnableDebugPrivilege() )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectDll] EnableDebugPrivilege Failed.\r\n");
 		return FALSE;
 	}
@@ -53,7 +58,7 @@ BOOL RemoteThreadInjecter::InjectDll(LPCWSTR wzTargetName, LPCWSTR wzDllName)
 
 	if ( !WriteProcessMemory(hProcess, lpBuff, (LPVOID) wzDllName, (lstrlenW(wzDllName)+1)*2, &dwWrite) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectDll] WriteProcessMemory Failed.\r\n");
 		VirtualFreeEx(hProcess, lpBuff, (lstrlenW(wzDllName)+1)*2, MEM_DECOMMIT);
 		CloseHandle(hProcess);
@@ -76,7 +81,7 @@ BOOL RemoteThreadInjecter::InjectDll(LPCWSTR wzTargetName, LPCWSTR wzDllName)
 
 	if ( NULL == hThread )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectDll] CreateRemoteThread Failed.\r\n");
 		VirtualFreeEx(hProcess, lpBuff, (lstrlenW(wzDllName)+1)*2, MEM_DECOMMIT);
 		CloseHandle(hProcess);
@@ -88,7 +93,7 @@ BOOL RemoteThreadInjecter::InjectDll(LPCWSTR wzTargetName, LPCWSTR wzDllName)
 	VirtualFreeEx(hProcess, lpBuff, (lstrlenW(wzDllName)+1)*2, MEM_DECOMMIT);
 	CloseHandle(hProcess);
 	CloseHandle(hThread);
-	
+
 	return TRUE;
 }
 
@@ -107,7 +112,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	// 提升进程权限
 	if ( !EnableDebugPrivilege() )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] EnableDebugPrivilege Failed.\r\n");
 		return FALSE;
 	}
@@ -116,7 +121,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	PVOID pRemoteThread = VirtualAllocEx(hProcess, NULL, THREAD_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	if ( NULL == pRemoteThread )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] Alloc Thread Space Failed.\r\n");
 		CloseHandle(hProcess);
 		return FALSE;
@@ -125,7 +130,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	// 将线程代码写入
 	if ( !WriteProcessMemory(hProcess, pRemoteThread, lpThreadFunc, THREAD_SIZE, 0) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] Write Code To Process Failed.\r\n");
 		VirtualFreeEx(hProcess, pRemoteThread, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
@@ -136,7 +141,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	LPVOID pRemotePara = VirtualAllocEx(hProcess, NULL, dwParaSize, MEM_COMMIT, PAGE_READWRITE);
 	if( NULL == pRemotePara )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] Alloc Parameter Space Failed.\r\n");
 		VirtualFreeEx(hProcess, pRemoteThread, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
@@ -146,7 +151,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	// 写入参数
 	if( !WriteProcessMemory(hProcess, pRemotePara, lpFuncPara, dwParaSize, 0) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] Write Code Parameter To Process Failed\r\n");
 		VirtualFreeEx(hProcess, pRemoteThread, 0, MEM_RELEASE);
 		VirtualFreeEx(hProcess, pRemotePara, 0, MEM_RELEASE);
@@ -160,7 +165,7 @@ BOOL RemoteThreadInjecter::InjectCode(LPWSTR wzTargetName, THREADFUNC lpThreadFu
 	hThread = CreateRemoteThread(hProcess, NULL, 0, (DWORD (WINAPI *)(LPVOID))pRemoteThread, pRemotePara, 0, &dwThreadId);
 	if( NULL == hThread )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [InjectCode] CreateRemoteThread Failed.\r\n");
 		VirtualFreeEx(hProcess, pRemoteThread, 0, MEM_RELEASE);
 		VirtualFreeEx(hProcess, pRemotePara, 0, MEM_RELEASE);
@@ -186,7 +191,7 @@ HANDLE RemoteThreadInjecter::GetProcessHandleByName(LPCWSTR wzProcessName)
 
 	if ( INVALID_HANDLE_VALUE == hSnapshot )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [GetProcessHandleByName] CreateToolhelp32Snapshot Failed.\r\n");
 		return NULL;
 	}
@@ -196,7 +201,7 @@ HANDLE RemoteThreadInjecter::GetProcessHandleByName(LPCWSTR wzProcessName)
 
 	if ( !Process32FirstW(hSnapshot, &pe32) )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [GetProcessHandleByName] Process32FirstW Failed.\r\n");
 		CloseHandle(hSnapshot);
 		return NULL;
@@ -215,7 +220,7 @@ HANDLE RemoteThreadInjecter::GetProcessHandleByName(LPCWSTR wzProcessName)
 
 			if ( NULL == hProcess )
 			{
-				DebugTools::OutputDebugPrintf(
+				DebugTools::OutputDebugPrintfW(
 					L"[RemoteInjecter] [GetProcessHandleByName] OpenProcess Failed.\r\n");
 				CloseHandle(hSnapshot);
 				return NULL;
@@ -228,7 +233,7 @@ HANDLE RemoteThreadInjecter::GetProcessHandleByName(LPCWSTR wzProcessName)
 
 	if ( NULL == hProcess )
 	{
-		DebugTools::OutputDebugPrintf(
+		DebugTools::OutputDebugPrintfW(
 			L"[RemoteInjecter] [GetProcessHandleByName] Can't Find The Specified Process.\r\n");
 	}
 

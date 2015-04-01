@@ -12,7 +12,7 @@
 class WindowWrapper
 {
 public:
-	WindowWrapper(HINSTANCE hInst = NULL) : m_hInstance(hInst), m_hWnd(NULL) {}
+	WindowWrapper(HINSTANCE hInst = NULL, bool showWnd = false) : m_hInstance(hInst), m_hWnd(NULL), m_showWnd(showWnd) {}
 
 	typedef LRESULT (WINAPI *WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 	void RegisterClass(WNDPROC lpProc);
@@ -24,6 +24,7 @@ public:
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
+	bool m_showWnd;
 };
 
 /*!

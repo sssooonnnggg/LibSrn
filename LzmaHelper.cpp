@@ -5,7 +5,7 @@
 	Remark		:
 */
 
-//#include "stdafx.h"
+#include "stdafx.h"
 
 #include "DebugTools.h"
 #include "LzmaHelper.h"
